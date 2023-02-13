@@ -1,0 +1,11 @@
+---
+# - name: Setup Production Notes
+#   import_tasks: production-notes.yml
+# - name: Install Mongo Client
+#   import_tasks: install-mongosh.yml
+# - name: Install Node
+  # import_tasks: install-node.yml
+- name: Install Java
+  import_tasks: install-java.yml
+# - name: Install Git
+#   import_tasks: install-git.yml

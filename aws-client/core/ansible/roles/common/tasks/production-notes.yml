@@ -1,0 +1,26 @@
+---
+- name: Format /data
+  shell: mkfs.xfs /dev/xvdb
+
+- name: Mount xvdb on /data
+  mount:
+    name: /data
+    src: /dev/xvdb
+    fstype: xfs
+    opts: defaults,noatime
+    state: mounted
+
+- name: Set hostname to mongo.kingan916.com
+  hostname:
+    name: mongo.kingan916.com
+  become: true
+
+- name: "Set SELinux to permissive"
+  selinux:
+    policy: targeted
+    state: permissive
+  become: true
+
+- name: "Changing SELinux context"
+  shell: setenforce 0
+  become: true

@@ -1,0 +1,19 @@
+---
+- name: Install Java 17 OpenJDK
+  become: true
+  package:
+    name: java-17-openjdk
+    state: present
+
+- name: Install Apache Maven
+  become: true
+  package:
+    name: maven
+    state: present
+
+- name: Set JAVA_HOME environment variable
+  become: true
+  lineinfile:
+    dest: /etc/environment
+    state: present
+    line: "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-17.0.6.0.10-3.el8_7.x86_64"

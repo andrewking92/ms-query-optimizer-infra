@@ -1,0 +1,35 @@
+
+---
+- name: "Copy MongoDB Repository File"
+  copy:
+    src: "../files/{{mongodb_repo}}"
+    dest: "/etc/yum.repos.d/{{mongodb_repo}}"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+  become: true
+
+- name: "Install MongoDB"
+  yum: 
+    name: mongodb-enterprise
+    state: latest
+  become: true
+
+- name: "Copy Data Template File"
+  copy:
+    src: "../files/template.json"
+    dest: "/data/template.json"
+    owner: ec2-user
+    group: ec2-user
+    mode: "u=rw,g=r,o=r"
+  become: true
+
+- name: Print HOME environment variable
+  command: echo $HOME
+  register: home_output
+  become: true
+  become_user: ec2-user
+
+- name: Display HOME variable value
+  debug:
+    var: home_output.stdout_lines
