@@ -1,0 +1,53 @@
+---
+- name: "Download Public Signature File"
+  rpm_key:
+    state: present
+    key: https://www.mongodb.org/static/pgp/opsmanager-6.0.asc
+
+- name: "Download Ops Manager RPM"
+  get_url:
+    url: "{{om_download_url}}"
+    dest: /tmp/mongodb-mms.rpm
+
+- name: "Install the RPM"
+  yum:
+    name: /tmp/mongodb-mms.rpm
+    state: present
+
+- name: Create directories
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: mongodb-mms
+    group: mongodb-mms
+    mode: 0775
+  loop:
+    - /data/head
+    - /data/mongodb-releases
+
+# - name: Adjust conf-mms properties file
+#   lineinfile:
+#     path: "/opt/mongodb/mms/conf/conf-mms.properties"
+#     line: |
+#       {{mongo_mongoUri}}
+#       {{mongo_encrypted}}
+#     create: no
+#     state: present
+
+- name: Replacing mongoUri
+  replace:
+    path: /opt/mongodb/mms/conf/conf-mms.properties
+    regexp: '^mongo.mongoUri=.*'
+    replace: "{{mongo_mongoUri}}"
+
+- name: "Start mongodb-mms service"
+  systemd:
+    state: started
+    daemon_reload: yes
+    enabled: yes
+    name: mongodb-mms.service
+
+- name: "Wait for port 8080 to become available"
+  wait_for:
+    port: 8080
+    timeout: 900

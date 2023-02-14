@@ -1,0 +1,74 @@
+---
+- name: Format /data
+  shell: mkfs.xfs /dev/xvdb
+
+- name: Mount xvdb on /data
+  mount:
+    name: /data
+    src: /dev/xvdb
+    fstype: xfs
+    opts: defaults,noatime
+    state: mounted
+
+- name: Set hostname to opsmanager01.kingan916.com
+  hostname:
+    name: opsmanager01.kingan916.com
+  become: true
+
+- name: "Set SELinux to permissive"
+  selinux:
+    policy: targeted
+    state: permissive
+  become: true
+
+- name: "Changing SELinux context"
+  shell: setenforce 0
+  become: true
+
+- name: "Copy disable-transparent-huge-pages service"
+  copy:
+    src: "../files/disable-transparent-huge-pages.service"
+    dest: "/etc/systemd/system/disable-transparent-huge-pages.service"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+  become: true
+
+- name: "Start disable-transparent-huge-pages service"
+  service:
+    state: started
+    daemon_reload: yes
+    enabled: yes
+    name: disable-transparent-huge-pages.service
+  become: true
+
+- name: Create file path as root for tuned.conf
+  file:
+    path: /etc/tuned/mongodb
+    state: directory
+    owner: root
+    group: root
+    mode: 0775
+  become: true
+
+- name: "Copy tuned.conf file"
+  copy:
+    src: "../files/tuned.conf"
+    dest: "{{tuned_conf}}"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+
+- name: Set tuned active profile to mongodb
+  command: tuned-adm profile mongodb
+  become: true
+  register: tuned_output
+- name: Output command output
+  debug:
+    msg: "{{ tuned_output.stdout }}"
+
+- name: Reboot host
+  reboot:
+    reboot_timeout: 600
+    msg: Rebooting the system
+  become: true

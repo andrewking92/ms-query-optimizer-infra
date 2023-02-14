@@ -1,0 +1,5 @@
+---
+- name: Configure Production Notes
+  import_tasks: production-notes.yml
+- name: Install Agent
+  import_tasks: install-agent.yml

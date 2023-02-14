@@ -1,0 +1,45 @@
+---
+- name: "Download MMS Agent RPM"
+  get_url:
+    url: "{{mms_agent_download_url}}"
+    dest: /tmp/mms-agent.rpm
+
+- name: Install RPM package
+  yum:
+    name: /tmp/mms-agent.rpm
+    state: installed
+
+- name: Replacing mmsGroupId
+  replace:
+    path: /etc/mongodb-mms/automation-agent.config
+    regexp: '^mmsGroupId=.*'
+    replace: "mmsGroupId={{mmsGroupId}}"
+
+- name: Replacing mmsApiKey
+  replace:
+    path: /etc/mongodb-mms/automation-agent.config
+    regexp: '^mmsApiKey=.*'
+    replace: "mmsApiKey={{mmsApiKey}}"
+
+- name: Replacing mmsBaseUrl
+  replace:
+    path: /etc/mongodb-mms/automation-agent.config
+    regexp: '^mmsBaseUrl=.*'
+    replace: "mmsBaseUrl={{mmsBaseUrl}}"
+
+- name: Create directories
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: mongod
+    group: mongod
+    mode: 0775
+  loop:
+    - /data
+
+- name: "Start mongodb-mms-automation-agent service"
+  systemd:
+    state: started
+    daemon_reload: yes
+    enabled: yes
+    name: mongodb-mms-automation-agent.service

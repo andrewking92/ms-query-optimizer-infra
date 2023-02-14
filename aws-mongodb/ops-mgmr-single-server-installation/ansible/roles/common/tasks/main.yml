@@ -1,0 +1,7 @@
+---
+- name: Configure Production Notes
+  import_tasks: production-notes.yml
+- name: Install Backing DBs
+  import_tasks: install-backing-dbs.yml
+- name: Install Ops Manager
+  import_tasks: install-ops-manager.yml
